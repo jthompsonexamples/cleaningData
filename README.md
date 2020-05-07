@@ -20,5 +20,4 @@ a complete data set.
 The data were subset using regular expressions to only get the mean, sd, and meanFreq
 measurements and the names cleaned up by removing dashes.
 
-Finally the data were reformatted from wide to tidy using the gather command to convert into
-a two column structure.
+Finally I calculated the mean of each feature using group_by and summarize.
