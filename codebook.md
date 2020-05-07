@@ -42,4 +42,9 @@ The set of variables that were estimated from these signals are:
 
 mean(): Mean value of the measurements
 std(): Standard deviation of the measurements
-meanFreq(): Weighted average of the frequency components to obtain a mean frequency
+
+The data set also contains a recording of the subject number and the
+activity being performed in variables:
+
+Subject
+Activity
