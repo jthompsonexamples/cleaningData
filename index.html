@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navy SEAL Mission Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2332 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .motto {
+            font-size: 1.6em;
+            color: #8b9dc3;
+            font-style: italic;
+            margin-top: 15px;
+        }
+
+        .timer-display {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin: 40px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .time-value {
+            font-size: 4em;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            line-height: 1;
+        }
+
+        .time-label {
+            font-size: 0.9em;
+            color: #8b9dc3;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .controls {
+            margin-top: 40px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #8b9dc3;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="datetime-local"] {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #4a5568;
+            color: #e0e0e0;
+            padding: 12px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        input[type="datetime-local"]:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        button {
+            background: #d4af37;
+            color: #0a1628;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #b8941f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .trident {
+            font-size: 3em;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .time-value {
+                font-size: 2.5em;
+            }
+
+            .countdown {
+                gap: 15px;
+            }
+
+            .time-unit {
+                min-width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="trident">⚓</div>
+            <h1>Wags Anchors Aweigh</h1>
+            <p class="motto">"Stand by"</p>
+        </div>
+
+        <div class="timer-display">
+            <div class="countdown">
+                <div class="time-unit">
+                    <div class="time-value" id="days">000</div>
+                    <div class="time-label">Days</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="hours">00</div>
+                    <div class="time-label">Hours</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="minutes">00</div>
+                    <div class="time-label">Minutes</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="seconds">00</div>
+                    <div class="time-label">Seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="endDate">Mission End Date & Time</label>
+                <input type="datetime-local" id="endDate">
+                <button onclick="updateCountdown()">Set Target</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let targetDate = new Date('2026-02-28T17:00:00');
+        let countdownInterval;
+
+        function formatNumber(num, digits) {
+            return String(num).padStart(digits, '0');
+        }
+
+        function calculateTimeRemaining() {
+            const now = new Date();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                return {
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    expired: true
+                };
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            return {
+                days,
+                hours,
+                minutes,
+                seconds,
+                expired: false
+            };
+        }
+
+        function updateDisplay() {
+            const time = calculateTimeRemaining();
+
+            document.getElementById('days').textContent = formatNumber(time.days, 3);
+            document.getElementById('hours').textContent = formatNumber(time.hours, 2);
+            document.getElementById('minutes').textContent = formatNumber(time.minutes, 2);
+            document.getElementById('seconds').textContent = formatNumber(time.seconds, 2);
+
+            if (time.expired) {
+                clearInterval(countdownInterval);
+            }
+        }
+
+        function startCountdown() {
+            updateDisplay();
+            countdownInterval = setInterval(updateDisplay, 1000);
+        }
+
+        function updateCountdown() {
+            const dateInput = document.getElementById('endDate');
+            const newDate = new Date(dateInput.value);
+
+            if (newDate && !isNaN(newDate.getTime())) {
+                targetDate = newDate;
+                clearInterval(countdownInterval);
+                startCountdown();
+            } else {
+                alert('Please select a valid date and time.');
+            }
+        }
+
+        function initializeDateInput() {
+            const dateInput = document.getElementById('endDate');
+            const year = targetDate.getFullYear();
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            const hours = String(targetDate.getHours()).padStart(2, '0');
+            const minutes = String(targetDate.getMinutes()).padStart(2, '0');
+            
+            dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Initialize on page load
+        initializeDateInput();
+        startCountdown();
+    </script>
+</body>
+</html>
